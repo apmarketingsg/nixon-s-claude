@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cold Email Generator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Cold Email Generator</h1>
+      <p class="subtitle">Fill in 3 fields. Get a ready-to-paste Claude prompt.</p>
+    </header>
+
+    <div class="card">
+      <div class="field-group">
+        <label for="myCompany">My Company</label>
+        <input
+          type="text"
+          id="myCompany"
+          placeholder="e.g. Lockton Companies"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="field-group">
+        <label for="whatISell">What I am selling</label>
+        <textarea
+          id="whatISell"
+          rows="3"
+          placeholder="e.g. Trade Credit Insurance — protects businesses against the risk of buyers failing to pay for goods or services delivered on credit"
+        ></textarea>
+      </div>
+
+      <div class="field-group">
+        <label for="targetCompany">Target Company</label>
+        <input
+          type="text"
+          id="targetCompany"
+          placeholder="e.g. Olam International"
+          autocomplete="off"
+        />
+      </div>
+
+      <button id="generateBtn" onclick="generatePrompt()">Generate Prompt</button>
+    </div>
+
+    <div class="output-section" id="outputSection">
+      <div class="output-header">
+        <span>Your Claude prompt &mdash; copy and paste into Claude</span>
+        <button class="copy-btn" id="copyBtn" onclick="copyPrompt()">Copy to Clipboard</button>
+      </div>
+      <textarea id="outputPrompt" readonly></textarea>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
