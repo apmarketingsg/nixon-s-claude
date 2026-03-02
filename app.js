@@ -1,266 +1,144 @@
-// ── Field IDs to persist in localStorage ──
-const FIELDS = [
-  'productName', 'oneLiner', 'whatItDoes', 'productType', 'pricingModel',
-  'targetCompanyType', 'decisionMaker', 'primaryUseCase',
-  'painPoint1', 'painPoint2', 'painPoint3', 'currentSolutionFail',
-  'keyDiff', 'proofPoints', 'competitors',
-  'brandTone', 'avoidWords', 'customerLanguage',
-  'companyName', 'companyWebsite', 'companyLinkedIn', 'knownContext'
-];
+function generatePrompt() {
+  const myCompany    = document.getElementById('myCompany').value.trim();
+  const whatISell    = document.getElementById('whatISell').value.trim();
+  const targetCompany = document.getElementById('targetCompany').value.trim();
 
-const STORAGE_KEY = 'coldEmailDashboard_v1';
-
-// ── Save / Load ──
-function saveForm() {
-  const data = {};
-  FIELDS.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) data[id] = el.value;
-  });
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  showSaveIndicator();
-}
-
-function loadForm() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return;
-  try {
-    const data = JSON.parse(raw);
-    FIELDS.forEach(id => {
-      const el = document.getElementById(id);
-      if (el && data[id] !== undefined) el.value = data[id];
-    });
-  } catch (_) {}
-}
-
-// ── Autosave indicator ──
-let saveTimer;
-function showSaveIndicator() {
-  let el = document.getElementById('saveIndicator');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = 'saveIndicator';
-    el.textContent = '✓ Saved';
-    document.body.appendChild(el);
-  }
-  el.classList.add('visible');
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => el.classList.remove('visible'), 1800);
-}
-
-// ── Attach listeners ──
-function attachListeners() {
-  FIELDS.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.addEventListener('input', saveForm);
-    el.addEventListener('change', saveForm);
-  });
-}
-
-// ── Prompt Compiler ──
-function val(id) {
-  const el = document.getElementById(id);
-  return el ? el.value.trim() : '';
-}
-
-function line(label, value) {
-  return value ? `- **${label}:** ${value}` : '';
-}
-
-function compilePrompt() {
-  const company = val('companyName');
-  if (!company) {
-    alert('Please enter a target company name before drafting.');
-    document.getElementById('companyName').focus();
-    return null;
+  if (!myCompany || !whatISell || !targetCompany) {
+    alert('Please fill in all 3 fields before generating.');
+    return;
   }
 
-  const productName      = val('productName')        || '[Your Product]';
-  const oneLiner         = val('oneLiner');
-  const whatItDoes       = val('whatItDoes');
-  const productType      = val('productType');
-  const pricingModel     = val('pricingModel');
-  const targetCompType   = val('targetCompanyType');
-  const decisionMaker    = val('decisionMaker');
-  const primaryUseCase   = val('primaryUseCase');
-  const painPoint1       = val('painPoint1');
-  const painPoint2       = val('painPoint2');
-  const painPoint3       = val('painPoint3');
-  const currentFail      = val('currentSolutionFail');
-  const keyDiff          = val('keyDiff');
-  const proofPoints      = val('proofPoints');
-  const competitors      = val('competitors');
-  const brandTone        = val('brandTone');
-  const avoidWords       = val('avoidWords');
-  const customerLang     = val('customerLanguage');
-  const website          = val('companyWebsite');
-  const linkedin         = val('companyLinkedIn');
-  const knownContext     = val('knownContext');
+  const prompt = buildPrompt(myCompany, whatISell, targetCompany);
 
-  // Build pain points list
-  const painPoints = [painPoint1, painPoint2, painPoint3].filter(Boolean);
-  const painList = painPoints.length
-    ? painPoints.map(p => `  - ${p}`).join('\n')
-    : '  - (not specified)';
+  const outputSection = document.getElementById('outputSection');
+  const outputPrompt  = document.getElementById('outputPrompt');
 
-  // Build product context block
-  const productBlock = [
-    line('Product', productName),
-    oneLiner        ? line('One-liner', oneLiner)                       : '',
-    whatItDoes      ? `- **What it does:** ${whatItDoes}`               : '',
-    productType     ? line('Product type', productType)                 : '',
-    pricingModel    ? line('Pricing', pricingModel)                     : '',
-    targetCompType  ? line('Target company type', targetCompType)       : '',
-    decisionMaker   ? line('Decision-maker(s)', decisionMaker)          : '',
-    primaryUseCase  ? line('Primary use case', primaryUseCase)          : '',
-    competitors     ? line('Competitors', competitors)                  : '',
-    currentFail     ? line('Why current solutions fail', currentFail)   : '',
-    keyDiff         ? line('Key differentiators', keyDiff)              : '',
-    proofPoints     ? line('Proof / case studies', proofPoints)         : '',
-    brandTone       ? line('Brand tone', brandTone)                     : '',
-    avoidWords      ? line('Words to avoid', avoidWords)                : '',
-    customerLang    ? line('Customer\'s own words', `"${customerLang}"`) : '',
-  ].filter(Boolean).join('\n');
+  outputPrompt.value = prompt;
+  outputSection.classList.add('visible');
+  outputSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-  // Build target company block
-  const targetLines = [
-    `- **Company:** ${company}`,
-    website    ? `- **Website:** ${website}`     : '',
-    linkedin   ? `- **LinkedIn:** ${linkedin}`   : '',
-    knownContext ? `- **Known context:** ${knownContext}` : '',
-  ].filter(Boolean).join('\n');
+  const copyBtn = document.getElementById('copyBtn');
+  copyBtn.textContent = 'Copy to Clipboard';
+  copyBtn.classList.remove('copied');
+}
 
-  const prompt = `You are an expert B2B cold email writer. Your goal is to write an email that sounds like it came from a sharp, thoughtful human — not a sales machine following a template.
-
-## YOUR PRODUCT CONTEXT
-
-${productBlock}
-
-**Core pain points this product solves:**
-${painList}
+function buildPrompt(myCompany, whatISell, targetCompany) {
+  return `You are an expert B2B cold email writer. You will research the seller and the target company, then write a highly personalised cold email.
 
 ---
 
-## TARGET COMPANY
+SELLER INFO
+Company: ${myCompany}
+What they sell: ${whatISell}
 
-${targetLines}
-
----
-
-## YOUR TASK
-
-**Step 1 — Research "${company}" thoroughly:**
-- Visit their website and read their About, Product, and Careers pages
-- Check recent news, press releases, or funding announcements
-- Look at their LinkedIn company page: team size, recent hires, open roles
-- Identify their tech stack or tools if visible
-- Look for any signals of the pain points listed above (e.g. hiring ops roles, recent pivots, public complaints, fast growth stress)
-
-**Step 1.5 — World News Context Scan (internal, do not show this assessment in the output):**
-Scan for recent world news (last 90 days) relevant to ${company}'s business across these dimensions:
-- **Industry / sector:** ${targetCompType || 'their sector'} — look for regulatory changes, sector disruptions, market-wide trends
-- **Geography:** their primary operating region and key customer markets — look for geopolitical events, economic conditions, trade policies, currency moves
-- **Business model exposure:** what external forces directly affect their revenue (trade, energy, regulation, labour, capital markets)
-- **Customer segment pressure:** news affecting who their customers are and how they're spending
-
-For each relevant news item found, score it:
-- **High direct impact** (directly affects their revenue, costs, compliance, or demand) → use in the email
-- **Medium impact + geographically direct** → light touch mention only
-- **Low impact or generic** → skip entirely
-
-**Rules for applying news context in the email:**
-- Use at most ONE news reference — the single most relevant one
-- Default mode: weave it as a brief clause — "Given [X]..." or "With [trend] reshaping [sector]..." — not a news report
-- Full hook mode (rare): only if the news is existentially relevant to their core business (e.g. active conflict affecting an oil trader's supply routes, a new regulation directly targeting their product category, a major market event hitting their revenue model directly) — in this case the news becomes the opening observation
-- Skip entirely if: the connection requires too many inferential steps, the news is generic and widely known, the news involves casualties or disasters that would feel inappropriate in a sales context, or no strong connection exists
-- Frame as an observant peer sharing a relevant insight — never as doom-and-gloom, never as capitalising on bad news
-- Never use news in the subject line or CTA
-
-**Step 2 — Identify the single strongest hook:**
-Pick the ONE pain point or signal that maps most directly to what ${productName} solves. This becomes the opening observation.
-
-**Step 3 — Write the cold email using this framework:**
-> **Observation → Problem → Proof → Ask**
-> You noticed X → which usually means Y challenge → We helped [similar company] with that → Interested?
-
-**Step 4 — Follow these rules (non-negotiable):**
-- Under 120 words in the email body
-- Open with THEIR world, not yours — "you/your" dominates over "I/we"
-- No opener like "I hope this email finds you well" or "My name is X"
-- No jargon: no "synergy", "leverage", "circle back", "best-in-class"
-- One low-friction CTA — interest-based, not a meeting request (e.g. "Worth exploring?" or "Would this be useful?")
-- Tone: ${brandTone || 'direct, peer-level, confident but not pushy'}
-${avoidWords ? `- Avoid these words/phrases: ${avoidWords}` : ''}
-- Read it aloud — if it sounds like marketing copy, rewrite it
-
-**Step 5 — Also provide:**
-- 3 subject line options (2–4 words, lowercase, internal-looking — NOT a product pitch)
-- A one-sentence note explaining why you chose this specific angle for ${company}
+TARGET COMPANY
+Company name: ${targetCompany}
 
 ---
 
-## OUTPUT FORMAT
+YOUR TASK — complete all steps in order:
 
-**Subject line options:**
+STEP 1 — RESEARCH THE SELLER
+Search the web for ${myCompany}. Understand:
+- What they do and how they position themselves
+- Their key differentiators and proof points
+- The type of customers they typically serve
+- Any notable case studies, clients, or results
+
+STEP 2 — RESEARCH THE TARGET COMPANY
+Search the web for ${targetCompany}. Understand:
+- Their business model, industry, and size
+- Their likely decision-makers and org structure
+- Recent news, announcements, fundraising, or strategic moves
+- Signals of pain points relevant to what ${myCompany} sells
+- Their tech stack or operational setup (if relevant)
+
+STEP 3 — WORLD NEWS CONTEXT SCAN (internal — do not show this assessment in your output)
+After researching the target company, scan for world news from the last 90 days relevant to their industry, geography, and business model. Score each piece of news across three dimensions:
+- Direct business impact: High / Medium / Low
+- Geographic proximity: Direct / Adjacent / Global
+- Time sensitivity: Urgent / Current / Trend
+
+Decision matrix:
+- High impact, any geography → Use (Light Touch or Full Hook)
+- Medium impact, Direct or Adjacent geography → Use (Light Touch)
+- Medium impact, Global only → Skip
+- Low impact, any geography → Skip
+
+Application modes:
+- Light Touch (default): One brief clause woven into the email — e.g. "Given [X] in [region/sector]..." or "With [trend] putting pressure on [area]..."
+- Full Hook (rare): Only if news directly threatens or reshapes their core business model and the relevance is unmistakeable
+- Skip: If generic, too old, insensitive, or the connection requires too many inferential steps
+
+This assessment is internal — do NOT include it in your output.
+
+STEP 4 — IDENTIFY THE STRONGEST HOOK
+Based on your research, identify the single best opening observation — something specific about ${targetCompany}, their industry, or a recent event that naturally leads into why ${whatISell} is relevant to them. The hook should feel like something a sharp, informed peer noticed — not a generic compliment or a feature dump.
+
+STEP 5 — WRITE THE COLD EMAIL
+Write the email using the Observation → Problem → Proof → Ask framework:
+- Observation: What you noticed about them (specific, research-based)
+- Problem: The challenge this usually creates
+- Proof: One concrete proof point or result from ${myCompany}
+- Ask: A low-friction, interest-based CTA
+
+NON-NEGOTIABLE RULES:
+- Under 120 words (hard limit — count carefully)
+- Never open with your name, your company name, or "I hope this email finds you well"
+- No jargon: no "synergy", "leverage", "best-in-class", "leading provider", "circle back"
+- No feature dumps — one proof point beats ten features
+- Write in plain text — no HTML, no bullet points, no bold
+- "You/your" must dominate over "I/we"
+- One CTA only, at the very end, low commitment: "Worth exploring?" / "Would this be useful?" / "Relevant to you?"
+- Sound like a peer who noticed something, not a vendor pitching
+
+STEP 6 — SUBJECT LINES
+Provide 3 subject line options. Rules:
+- 2–4 words, all lowercase, no punctuation
+- Must look internal, like a message from a colleague — NOT a sales pitch
+- No company names, no product names, no urgency phrases, no emojis
+- Good examples: "trade credit exposure", "q2 credit risk", "supplier defaults"
+- Bad examples: "Boost your revenue!", "Quick question for you", "RE: Important opportunity"
+
+---
+
+OUTPUT FORMAT
+
+Return exactly this, nothing else before or after:
+
+Subject line options:
 1. [option 1]
 2. [option 2]
 3. [option 3]
 
-**Email:**
-[email body here]
+Email:
+[The cold email — plain text, no formatting, under 120 words]
 
-**Why this angle:**
-[one sentence explaining the hook you chose]
-`;
-
-  return prompt.trim();
+Why this hook:
+[1–2 sentences explaining what research signal drove the opening observation and why it connects to what ${myCompany} sells]`;
 }
 
-// ── Draft Button ──
-function onDraft() {
-  const prompt = compilePrompt();
-  if (!prompt) return;
-
-  const output = document.getElementById('outputPrompt');
+function copyPrompt() {
+  const outputPrompt = document.getElementById('outputPrompt');
   const copyBtn = document.getElementById('copyBtn');
-  const meta = document.getElementById('outputMeta');
 
-  output.value = prompt;
-  copyBtn.disabled = false;
+  if (!outputPrompt.value) return;
 
-  const wordCount = prompt.split(/\s+/).filter(Boolean).length;
-  const charCount = prompt.length;
-  meta.textContent = `${wordCount} words · ${charCount} characters`;
-
-  // Scroll output into view on mobile
-  document.getElementById('outputCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-// ── Copy Button ──
-function onCopy() {
-  const output = document.getElementById('outputPrompt');
-  if (!output.value) return;
-
-  navigator.clipboard.writeText(output.value).then(() => {
-    const btn = document.getElementById('copyBtn');
-    btn.textContent = '✓ Copied!';
-    btn.classList.add('copied');
+  navigator.clipboard.writeText(outputPrompt.value).then(() => {
+    copyBtn.textContent = 'Copied!';
+    copyBtn.classList.add('copied');
     setTimeout(() => {
-      btn.textContent = 'Copy to Clipboard';
-      btn.classList.remove('copied');
+      copyBtn.textContent = 'Copy to Clipboard';
+      copyBtn.classList.remove('copied');
     }, 2000);
   }).catch(() => {
-    // Fallback for browsers without clipboard API
-    output.select();
+    outputPrompt.select();
     document.execCommand('copy');
+    copyBtn.textContent = 'Copied!';
+    copyBtn.classList.add('copied');
+    setTimeout(() => {
+      copyBtn.textContent = 'Copy to Clipboard';
+      copyBtn.classList.remove('copied');
+    }, 2000);
   });
 }
-
-// ── Init ──
-document.addEventListener('DOMContentLoaded', () => {
-  loadForm();
-  attachListeners();
-  document.getElementById('draftBtn').addEventListener('click', onDraft);
-  document.getElementById('copyBtn').addEventListener('click', onCopy);
-});

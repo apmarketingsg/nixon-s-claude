@@ -3,200 +3,57 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cold Email Dashboard</title>
+  <title>Cold Email Generator</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header>
-    <div class="header-inner">
-      <div class="logo">
-        <span class="logo-icon">✉</span>
-        <span class="logo-text">Cold Email Dashboard</span>
+  <div class="container">
+    <header>
+      <h1>Cold Email Generator</h1>
+      <p class="subtitle">Fill in 3 fields. Get a ready-to-paste Claude prompt.</p>
+    </header>
+
+    <div class="card">
+      <div class="field-group">
+        <label for="myCompany">My Company</label>
+        <input
+          type="text"
+          id="myCompany"
+          placeholder="e.g. Lockton Companies"
+          autocomplete="off"
+        />
       </div>
-      <p class="header-sub">Fill in your product context, enter a target company, and generate your Claude prompt.</p>
+
+      <div class="field-group">
+        <label for="whatISell">What I am selling</label>
+        <textarea
+          id="whatISell"
+          rows="3"
+          placeholder="e.g. Trade Credit Insurance — protects businesses against the risk of buyers failing to pay for goods or services delivered on credit"
+        ></textarea>
+      </div>
+
+      <div class="field-group">
+        <label for="targetCompany">Target Company</label>
+        <input
+          type="text"
+          id="targetCompany"
+          placeholder="e.g. Olam International"
+          autocomplete="off"
+        />
+      </div>
+
+      <button id="generateBtn" onclick="generatePrompt()">Generate Prompt</button>
     </div>
-  </header>
 
-  <main class="layout">
-
-    <!-- ── LEFT PANEL: Product Context ── -->
-    <section class="panel panel-left">
-      <div class="panel-header">
-        <h2>Product Context</h2>
-        <p class="panel-desc">This is saved automatically. It powers every email you draft.</p>
+    <div class="output-section" id="outputSection">
+      <div class="output-header">
+        <span>Your Claude prompt &mdash; copy and paste into Claude</span>
+        <button class="copy-btn" id="copyBtn" onclick="copyPrompt()">Copy to Clipboard</button>
       </div>
-
-      <form id="productForm" autocomplete="off">
-
-        <div class="card">
-          <h3>Product Overview</h3>
-          <div class="field">
-            <label for="productName">Product / Company Name</label>
-            <input type="text" id="productName" placeholder="e.g. Acme CRM" />
-          </div>
-          <div class="field">
-            <label for="oneLiner">One-liner</label>
-            <input type="text" id="oneLiner" placeholder="e.g. The CRM built for solo founders who hate admin" />
-          </div>
-          <div class="field">
-            <label for="whatItDoes">What it does (2–3 sentences)</label>
-            <textarea id="whatItDoes" rows="3" placeholder="Describe what your product does and who it's for..."></textarea>
-          </div>
-          <div class="field-row">
-            <div class="field">
-              <label for="productType">Product Type</label>
-              <select id="productType">
-                <option value="">Select...</option>
-                <option>SaaS</option>
-                <option>Marketplace</option>
-                <option>Agency / Service</option>
-                <option>Hardware + Software</option>
-                <option>Consulting</option>
-                <option>Other</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="pricingModel">Pricing Model</label>
-              <input type="text" id="pricingModel" placeholder="e.g. $99/mo per seat" />
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3>Target Audience</h3>
-          <div class="field">
-            <label for="targetCompanyType">Target Company Type</label>
-            <input type="text" id="targetCompanyType" placeholder="e.g. Series A–B SaaS companies, 50–200 employees" />
-          </div>
-          <div class="field">
-            <label for="decisionMaker">Decision-Maker Role(s)</label>
-            <input type="text" id="decisionMaker" placeholder="e.g. Head of Sales, VP Marketing, COO" />
-          </div>
-          <div class="field">
-            <label for="primaryUseCase">Primary Use Case</label>
-            <input type="text" id="primaryUseCase" placeholder="e.g. Replacing spreadsheet-based sales tracking" />
-          </div>
-        </div>
-
-        <div class="card">
-          <h3>Pain Points</h3>
-          <div class="field">
-            <label for="painPoint1">Pain Point #1 (most critical)</label>
-            <input type="text" id="painPoint1" placeholder="e.g. Reps spend 3+ hours/week on manual data entry" />
-          </div>
-          <div class="field">
-            <label for="painPoint2">Pain Point #2</label>
-            <input type="text" id="painPoint2" placeholder="e.g. Pipeline visibility is lagging by days" />
-          </div>
-          <div class="field">
-            <label for="painPoint3">Pain Point #3</label>
-            <input type="text" id="painPoint3" placeholder="e.g. Forecast accuracy is consistently off" />
-          </div>
-          <div class="field">
-            <label for="currentSolutionFail">Why current solutions fall short</label>
-            <textarea id="currentSolutionFail" rows="2" placeholder="e.g. Salesforce is too heavy; HubSpot free plan lacks reporting"></textarea>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3>Differentiation &amp; Proof</h3>
-          <div class="field">
-            <label for="keyDiff">Key Differentiators</label>
-            <textarea id="keyDiff" rows="2" placeholder="e.g. AI auto-fills CRM from email threads; setup in 10 min"></textarea>
-          </div>
-          <div class="field">
-            <label for="proofPoints">Proof Points / Case Studies</label>
-            <textarea id="proofPoints" rows="2" placeholder="e.g. Helped Fintech Co reduce admin time by 40%; 200+ customers"></textarea>
-          </div>
-          <div class="field">
-            <label for="competitors">Main Competitors</label>
-            <input type="text" id="competitors" placeholder="e.g. Salesforce, HubSpot, Pipedrive" />
-          </div>
-        </div>
-
-        <div class="card">
-          <h3>Voice &amp; Language</h3>
-          <div class="field-row">
-            <div class="field">
-              <label for="brandTone">Brand Tone</label>
-              <select id="brandTone">
-                <option value="">Select...</option>
-                <option>Direct &amp; no-nonsense</option>
-                <option>Warm &amp; conversational</option>
-                <option>Professional &amp; formal</option>
-                <option>Confident &amp; bold</option>
-                <option>Technical &amp; precise</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="avoidWords">Words / phrases to avoid</label>
-              <input type="text" id="avoidWords" placeholder="e.g. synergy, leverage, disrupt" />
-            </div>
-          </div>
-          <div class="field">
-            <label for="customerLanguage">Verbatim customer language (how they describe their problem)</label>
-            <textarea id="customerLanguage" rows="2" placeholder="e.g. 'I waste half my Monday just updating the CRM'"></textarea>
-          </div>
-        </div>
-
-      </form>
-    </section>
-
-    <!-- ── RIGHT PANEL: Target + Output ── -->
-    <section class="panel panel-right">
-
-      <div class="card target-card">
-        <h2>Target Company</h2>
-        <div class="field">
-          <label for="companyName">Company Name <span class="required">*</span></label>
-          <input type="text" id="companyName" placeholder="e.g. Notion, Linear, Stripe" />
-        </div>
-        <div class="field">
-          <label for="companyWebsite">Website (optional)</label>
-          <input type="url" id="companyWebsite" placeholder="https://example.com" />
-        </div>
-        <div class="field">
-          <label for="companyLinkedIn">LinkedIn URL (optional)</label>
-          <input type="url" id="companyLinkedIn" placeholder="https://linkedin.com/company/..." />
-        </div>
-        <div class="field">
-          <label for="knownContext">Any known context about this company (optional)</label>
-          <textarea id="knownContext" rows="2" placeholder="e.g. Recently raised Series B, hiring 10+ sales reps, known for fast growth"></textarea>
-        </div>
-
-        <button id="draftBtn" type="button">
-          <span class="btn-icon">⚡</span>
-          Draft Cold Email
-        </button>
-      </div>
-
-      <div class="card output-card" id="outputCard">
-        <div class="output-header">
-          <h2>Generated Prompt</h2>
-          <button id="copyBtn" type="button" class="copy-btn" disabled>Copy to Clipboard</button>
-        </div>
-        <p class="output-instructions">
-          Click <strong>Draft Cold Email</strong> above → copy this prompt → paste it into Claude.
-          Claude will research the company and write your personalized email.
-        </p>
-        <textarea id="outputPrompt" rows="18" readonly placeholder="Your generated prompt will appear here..."></textarea>
-        <div class="output-meta" id="outputMeta"></div>
-      </div>
-
-      <div class="card how-card">
-        <h3>How it works</h3>
-        <ol class="steps">
-          <li><span class="step-num">1</span> Fill in your product context on the left (saved automatically)</li>
-          <li><span class="step-num">2</span> Enter the target company name above</li>
-          <li><span class="step-num">3</span> Click <strong>Draft Cold Email</strong></li>
-          <li><span class="step-num">4</span> Copy the prompt and paste into <a href="https://claude.ai" target="_blank" rel="noopener">claude.ai</a></li>
-          <li><span class="step-num">5</span> Claude researches the company and writes your email</li>
-          <li><span class="step-num">6</span> Copy the finished email and hit send 🚀</li>
-        </ol>
-      </div>
-
-    </section>
-  </main>
+      <textarea id="outputPrompt" readonly></textarea>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>
