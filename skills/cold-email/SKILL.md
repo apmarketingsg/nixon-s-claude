@@ -1,6 +1,6 @@
 # Cold Email Writing Skill
 
-**Version:** 1.1.0
+**Version:** 1.2.0
 **Purpose:** Write B2B cold emails and follow-up sequences that generate real replies.
 
 ---
@@ -22,6 +22,11 @@ Look for `.agents/product-marketing-context.md` and read it before asking any qu
 3. What's the value? (Specific problem you solve)
 4. What's your proof? (Result, case study, or credibility signal)
 5. Any research signals? (Funding, hiring, LinkedIn posts, company news, tech stack changes)
+
+**3. Run the World News Context scan (internal — see `skills/world-news-context/SKILL.md`):**
+After researching the company and before writing, scan for recent world news relevant to their industry, geography, and business model. Determine if any news warrants a light mention in the email or serves as the primary hook. This step runs silently — the assessment is internal and does not appear in the final output.
+
+> Default behaviour: one brief clause woven in if relevant. Full hook only if the news is directly, existentially relevant to their business. Skip entirely if no strong connection exists.
 
 ---
 
@@ -133,6 +138,8 @@ Best for: when social proof is your strongest asset.
 - [ ] Is there one clear, low-friction ask?
 - [ ] Under 150 words?
 - [ ] No banned phrases or jargon?
+- [ ] If news context was used: is it one brief touch, not a news briefing?
+- [ ] If news context was used: does it connect naturally to the product's value, not feel forced?
 
 ---
 
@@ -155,6 +162,7 @@ Best for: when social proof is your strongest asset.
 ## Related Skills
 
 - **product-marketing-context** — foundational positioning document (read this first)
+- **world-news-context** — internal engine for scanning and applying relevant world news as email context
 - **email-sequence** — lifecycle/nurture sequences (not cold outreach)
 - **copywriting** — landing pages and web copy
 - **social-content** — LinkedIn and social posts

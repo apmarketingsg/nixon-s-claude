@@ -157,6 +157,26 @@ ${targetLines}
 - Identify their tech stack or tools if visible
 - Look for any signals of the pain points listed above (e.g. hiring ops roles, recent pivots, public complaints, fast growth stress)
 
+**Step 1.5 — World News Context Scan (internal, do not show this assessment in the output):**
+Scan for recent world news (last 90 days) relevant to ${company}'s business across these dimensions:
+- **Industry / sector:** ${targetCompType || 'their sector'} — look for regulatory changes, sector disruptions, market-wide trends
+- **Geography:** their primary operating region and key customer markets — look for geopolitical events, economic conditions, trade policies, currency moves
+- **Business model exposure:** what external forces directly affect their revenue (trade, energy, regulation, labour, capital markets)
+- **Customer segment pressure:** news affecting who their customers are and how they're spending
+
+For each relevant news item found, score it:
+- **High direct impact** (directly affects their revenue, costs, compliance, or demand) → use in the email
+- **Medium impact + geographically direct** → light touch mention only
+- **Low impact or generic** → skip entirely
+
+**Rules for applying news context in the email:**
+- Use at most ONE news reference — the single most relevant one
+- Default mode: weave it as a brief clause — "Given [X]..." or "With [trend] reshaping [sector]..." — not a news report
+- Full hook mode (rare): only if the news is existentially relevant to their core business (e.g. active conflict affecting an oil trader's supply routes, a new regulation directly targeting their product category, a major market event hitting their revenue model directly) — in this case the news becomes the opening observation
+- Skip entirely if: the connection requires too many inferential steps, the news is generic and widely known, the news involves casualties or disasters that would feel inappropriate in a sales context, or no strong connection exists
+- Frame as an observant peer sharing a relevant insight — never as doom-and-gloom, never as capitalising on bad news
+- Never use news in the subject line or CTA
+
 **Step 2 — Identify the single strongest hook:**
 Pick the ONE pain point or signal that maps most directly to what ${productName} solves. This becomes the opening observation.
 
